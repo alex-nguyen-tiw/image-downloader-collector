@@ -1,0 +1,4 @@
+.claude/
+*.zip
+create_posix_zip.ps1
+generate_*.ps1

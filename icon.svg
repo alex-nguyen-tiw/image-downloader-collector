@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+
+    <!-- Main Accent Gradient (Blue to Emerald Green) -->
+    <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+
+    <!-- Glowing Arrow Gradient -->
+    <linearGradient id="arrow-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <!-- Drop Shadow Filter -->
+    <filter id="glow-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#3b82f6" flood-opacity="0.35"/>
+    </filter>
+    
+    <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="512" height="512" rx="112" fill="url(#bg-grad)"/>
+  
+  <!-- Subtle Outer Border Glow -->
+  <rect x="8" y="8" width="496" height="496" rx="104" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="4"/>
+
+  <!-- Center Artwork Container -->
+  <g filter="url(#glow-shadow)">
+    
+    <!-- Picture Frame / Image Collector Outline -->
+    <rect x="96" y="96" width="320" height="320" rx="36" fill="none" stroke="url(#accent-grad)" stroke-width="24"/>
+
+    <!-- Mountain / Photo Landscape Vectors -->
+    <path d="M 124 350 L 210 240 L 270 310 L 320 250 L 388 350 Z" fill="rgba(56, 189, 248, 0.25)"/>
+    <circle cx="170" cy="180" r="28" fill="#38bdf8" opacity="0.8"/>
+
+    <!-- Bookmark Ribbon Icon (Top Right) -->
+    <path d="M 330 96 L 380 96 C 391 96 400 105 400 116 L 400 220 L 365 190 L 330 220 Z" fill="#10b981" filter="url(#card-shadow)"/>
+
+    <!-- Prominent Downward Download Arrow (Center Overlay) -->
+    <g filter="url(#card-shadow)">
+      <!-- Arrow Stem -->
+      <rect x="226" y="160" width="60" height="130" rx="12" fill="url(#arrow-grad)"/>
+      <!-- Arrow Head -->
+      <path d="M 160 265 L 256 370 L 352 265 C 362 254 354 238 338 238 L 174 238 C 158 238 150 254 160 265 Z" fill="url(#arrow-grad)"/>
+    </g>
+
+    <!-- Bottom Base Bar of Download Icon -->
+    <rect x="150" y="380" width="212" height="24" rx="12" fill="url(#arrow-grad)" opacity="0.9"/>
+  </g>
+</svg>
