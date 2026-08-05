@@ -15,6 +15,8 @@ git checkout v1.0.1 && ./build.ps1
 
 | File | Nguồn gốc |
 |---|---|
+| `v1.1.0/ImageCollector-chromium-v1.1.0.zip` | ✅ **Bản gốc** đã build (chưa nộp store nào) |
+| `v1.1.0/ImageCollector-firefox-v1.1.0.zip` | ✅ **Bản gốc** đã build (chưa nộp store nào) |
 | `v1.0.1/ImageCollector-chromium-v1.0.1.zip` | ✅ **Bản gốc** đã build và nộp lên Edge/Opera |
 | `v1.0.1/ImageCollector-firefox-v1.0.1.zip` | ✅ **Bản gốc** đã build (chưa nộp AMO) |
 | `v1.0.0/ImageCollector-firefox-v1.0.0.zip` | ♻️ **Tái dựng** — xem ghi chú bên dưới |
@@ -40,3 +42,6 @@ từng byte** với tag `v1.0.0`, và manifest tại tag đó đúng là bản G
 |---|---|---|---|---|
 | 1.0.0 | — | — | ✅ live | ❌ trượt (nộp nhầm bản Gecko lên store Chromium) |
 | 1.0.1 | chưa nộp | ✅ approved | chưa nộp | ⏳ chờ duyệt |
+| 1.1.0 | chưa nộp | chưa nộp | chưa nộp | chưa nộp |
+
+Chi tiết thay đổi từng version: [`../CHANGELOG.md`](../CHANGELOG.md)

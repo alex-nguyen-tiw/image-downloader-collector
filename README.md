@@ -3,6 +3,25 @@
 Extension backlink asset cho **tshirtsiwant.com**. Code giống hệt nhau giữa các
 trình duyệt; **chỉ khác `manifest.json`** theo engine.
 
+📄 Tính năng sản phẩm & hướng dẫn người dùng: [`store-assets/README.md`](store-assets/README.md)
+📝 Lịch sử version: [`CHANGELOG.md`](CHANGELOG.md)
+
+## Tính năng (v1.1.0)
+
+| Tính năng | Vào bằng đâu |
+|---|---|
+| Download ảnh **gốc** (không phải thumbnail) | Icon hover · chuột phải · card trong dashboard |
+| Save vào folder tuỳ chỉnh | Icon hover · chuột phải |
+| Bật/tắt icon hover | Switch ở header dashboard (áp dụng ngay, không cần reload) |
+| Menu chuột phải `Image Collector ▸` | Mọi trang, context `image` + `link` |
+| Tải hàng loạt thành `.zip` + `sources.csv` | Dashboard |
+| Truy nguồn: badge domain, search theo domain | Dashboard |
+
+Quy tắc lấy ảnh gốc theo site nằm ở `upgradeToOriginal()` / `getAmazonDomHiRes()`
+trong `src/content.js` (Amazon, Etsy). **Bản sao đồng bộ của `upgradeToOriginal()`
+nằm trong `src/popup.js`** để ảnh lưu từ trước vẫn tải về đúng bản gốc — sửa một
+nơi thì phải sửa cả nơi kia.
+
 ## ⚠️ Quy tắc số 1: chỉ sửa code trong `src\`
 
 Trước đây dự án có 2 bản sao source (`chromium\` và `firefox\`) phải sửa song song.
@@ -65,15 +84,22 @@ gói `firefox` cho **AMO**.
 
 | Store | Engine | Version live | Trạng thái |
 |---|---|---|---|
-| Firefox AMO | Gecko | 1.0.0 | ✅ Approved |
+| Firefox AMO | Gecko | 1.0.0 | ✅ Approved — nên cập nhật lên 1.1.0 |
 | Edge | Chromium | 1.0.1 | ✅ Approved |
 | Opera | Chromium | — | ⏳ 1.0.1 awaiting moderation |
 | Chrome Web Store | Chromium | — | Chưa nộp |
+
+**1.1.0 đã build xong** (`releases/v1.1.0/`) nhưng **chưa nộp store nào**.
 
 ## Việc còn lại
 
 1. **Chờ Opera duyệt xong 1.0.1** rồi mới nộp 1.1.0 (tránh chồng hàng đợi).
 2. Chrome Web Store: nộp bản chromium. Cần chuẩn bị phần giải trình quyền
-   `<all_urls>` (đọc DOM mọi trang để phát hiện `<img>`/`srcset` cho tính năng
-   hover-save) + link privacy policy (khai "không thu thập dữ liệu").
-3. Firefox AMO: đang ở 1.0.0, nên cập nhật lên bản mới nhất.
+   `<all_urls>` + `contextMenus` (xem bảng trong
+   [`store-assets/README.md`](store-assets/README.md)) + link privacy policy
+   (khai "không thu thập dữ liệu").
+3. Firefox AMO: đang ở 1.0.0, nên cập nhật lên 1.1.0.
+
+> ⚠️ 1.1.0 thêm quyền `contextMenus`. Đây là quyền **không sinh cảnh báo** cho
+> người dùng nên extension không bị vô hiệu hoá khi tự động cập nhật, nhưng
+> Firefox/Edge vẫn sẽ **re-review** bản update.
