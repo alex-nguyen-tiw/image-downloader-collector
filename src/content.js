@@ -15,6 +15,14 @@
   let hideTimer = null;
   let hostEl = null;
   let shadowRoot = null;
+  // Whether the hover icons are shown. Toggled from the popup; the context
+  // menu keeps working regardless, so users can turn the icons off and still
+  // download/save via right-click.
+  let hoverEnabled = true;
+  // The element the user last right-clicked, so the context menu can resolve
+  // the original image URL from the DOM instead of the thumbnail Chrome
+  // reports in info.srcUrl.
+  let lastContextEl = null;
 
   // Render all UI inside a Shadow DOM so the host page's CSS can never
   // reach it (keeps the icons at a fixed shape/size on every site).
@@ -79,10 +87,20 @@
   }
   refreshFolders();
 
+  // Absent key means enabled — the feature is on by default.
+  chrome.storage.local.get(['hoverEnabled'], (res) => {
+    hoverEnabled = res.hoverEnabled !== false;
+  });
+
   // Listen for storage changes
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.folders) {
       activeFolders = changes.folders.newValue || [];
+    }
+    // Applies immediately to every open tab — no page reload needed.
+    if (changes.hoverEnabled) {
+      hoverEnabled = changes.hoverEnabled.newValue !== false;
+      if (!hoverEnabled) hideOverlay();
     }
   });
 
@@ -277,18 +295,7 @@
     downloadBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
-      if (!currentHoveredEl) return;
-      const imgUrl = getOriginalImageUrl(currentHoveredEl);
-      if (!imgUrl) return;
-
-      const title = currentHoveredEl.alt || document.title || 'Image';
-      chrome.runtime.sendMessage({
-        action: 'DOWNLOAD_SINGLE',
-        url: imgUrl,
-        filename: title
-      }, (res) => {
-        showToast('Download started', title, 'success');
-      });
+      downloadElement(currentHoveredEl);
     });
 
     saveBtn.addEventListener('click', (e) => {
@@ -349,14 +356,36 @@
     });
   }
 
-  function saveImageToFolder(folderId, folderName) {
-    if (!currentHoveredEl) return;
-    const imgUrl = getOriginalImageUrl(currentHoveredEl);
-    if (!imgUrl) return;
+  // Download the original (not the displayed thumbnail) behind an element.
+  // Shared by the hover button and the context menu.
+  function downloadElement(el) {
+    if (!el) return false;
+    const imgUrl = getOriginalImageUrl(el);
+    if (!imgUrl) return false;
 
-    const title = currentHoveredEl.alt || currentHoveredEl.title || document.title || 'Saved Image';
-    const width = currentHoveredEl.naturalWidth || currentHoveredEl.clientWidth || 0;
-    const height = currentHoveredEl.naturalHeight || currentHoveredEl.clientHeight || 0;
+    const title = el.alt || document.title || 'Image';
+    chrome.runtime.sendMessage({
+      action: 'DOWNLOAD_SINGLE',
+      url: imgUrl,
+      filename: title
+    }, () => {
+      showToast('Download started', title, 'success');
+    });
+    return true;
+  }
+
+  function saveImageToFolder(folderId, folderName) {
+    saveElementToFolder(currentHoveredEl, folderId, folderName);
+  }
+
+  function saveElementToFolder(el, folderId, folderName) {
+    if (!el) return false;
+    const imgUrl = getOriginalImageUrl(el);
+    if (!imgUrl) return false;
+
+    const title = el.alt || el.title || document.title || 'Saved Image';
+    const width = el.naturalWidth || el.clientWidth || 0;
+    const height = el.naturalHeight || el.clientHeight || 0;
 
     const newItem = {
       id: 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
@@ -385,6 +414,7 @@
         showToast('Saved to Collection!', `Folder: ${folderName}`, 'success');
       });
     });
+    return true;
   }
 
   function positionOverlay(el) {
@@ -477,6 +507,8 @@
 
   // Mouse Listener on Page
   document.addEventListener('mouseover', (e) => {
+    if (!hoverEnabled) return;
+
     // Pointer is over our own UI (all shadow events retarget to the host):
     // keep the overlay visible and do nothing else.
     if (e.target === hostEl) {
@@ -505,6 +537,33 @@
       positionOverlay(currentHoveredEl);
     }
   }, { passive: true });
+
+  // --- Context menu support -------------------------------------------------
+  // Remember what was right-clicked. Chrome's info.srcUrl only ever holds the
+  // URL the page is displaying (a thumbnail on Amazon/Etsy), so we resolve the
+  // real original from the element itself instead. Runs on capture so we still
+  // see the target when a page stops the event.
+  document.addEventListener('contextmenu', (e) => {
+    lastContextEl = resolveImageEl(e.target, e.clientX, e.clientY);
+  }, true);
+
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'CTX_DOWNLOAD' || request.action === 'CTX_SAVE') {
+      if (!lastContextEl) {
+        showToast('No image found here', 'Try right-clicking the image itself', 'info');
+        sendResponse({ handled: false });
+        return true;
+      }
+
+      const ok = request.action === 'CTX_DOWNLOAD'
+        ? downloadElement(lastContextEl)
+        : saveElementToFolder(lastContextEl, request.folderId, request.folderName);
+
+      if (!ok) showToast('Could not read that image', '', 'info');
+      sendResponse({ handled: ok });
+      return true;
+    }
+  });
 
   // Create the shadow host eagerly so the stylesheet is loaded before the
   // first hover (avoids a brief unstyled flash).

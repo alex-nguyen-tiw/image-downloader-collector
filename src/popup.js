@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnDeleteSelected = document.getElementById('btn-delete-selected');
   const btnBatchDownload = document.getElementById('btn-batch-download');
   const btnNewFolder = document.getElementById('btn-new-folder');
+  const chkHoverEnabled = document.getElementById('chk-hover-enabled');
 
   // Modal Elements
   const modalFolder = document.getElementById('modal-folder');
@@ -27,6 +28,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSaveFolder = document.getElementById('btn-save-folder');
 
   // Initialize Data
+  // Read the version from the manifest so it can never drift from the build.
+  const versionTagEl = document.getElementById('version-tag');
+  if (versionTagEl) versionTagEl.textContent = 'v' + chrome.runtime.getManifest().version;
+
+  // Hover-icon toggle. Turning it off only hides the on-page icons; the
+  // right-click menu keeps working.
+  chrome.storage.local.get(['hoverEnabled'], (res) => {
+    chkHoverEnabled.checked = res.hoverEnabled !== false;
+  });
+
+  chkHoverEnabled.addEventListener('change', () => {
+    chrome.storage.local.set({ hoverEnabled: chkHoverEnabled.checked });
+  });
+
   function loadData() {
     chrome.storage.local.get(['folders', 'savedImages'], (res) => {
       folders = res.folders || [{ id: 'default', name: 'Default', isDefault: true }];
@@ -126,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <input type="checkbox" class="img-card-select" ${isSelected ? 'checked' : ''}>
           <img src="${escapeHtml(img.url)}" alt="${escapeHtml(img.title || 'Saved Image')}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' fill=\\'%23666\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23333\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23aaa\\' font-size=\\'12\\'>Image Error</text></svg>'">
           ${dimensionText ? `<span class="img-dimension-tag">${dimensionText}</span>` : ''}
+          ${img.sourceDomain ? `<a class="img-source-tag" href="${escapeHtml(img.sourceUrl || '#')}" target="_blank" rel="noopener" title="Open source page: ${escapeHtml(img.sourceUrl || '')}">${escapeHtml(img.sourceDomain.replace(/^www\./, ''))}</a>` : ''}
           <div class="img-card-actions">
             <button class="card-action-btn btn-single-dl" title="Download Image">
               <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
@@ -311,6 +327,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const files = [];
     const usedNames = new Set();
+    // Provenance manifest shipped inside the archive, so the images stay
+    // traceable back to the page they came from once they leave the extension.
+    const csvRows = [['filename', 'title', 'folder', 'source_domain', 'source_url', 'saved_at']];
     let ok = 0;
     let fail = 0;
 
@@ -330,6 +349,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         usedNames.add(unique.toLowerCase());
         files.push({ name: unique, data: bytes });
+        csvRows.push([
+          unique,
+          item.title || '',
+          item.folderName || '',
+          item.sourceDomain || '',
+          item.sourceUrl || '',
+          item.createdAt ? new Date(item.createdAt).toISOString() : ''
+        ]);
         ok++;
       } catch (e) {
         console.warn('Failed to fetch', item.url, e);
@@ -346,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setBatchStatus('Building zip archive...');
     try {
+      files.push({ name: 'sources.csv', data: buildSourcesCsv(csvRows) });
       const blob = buildZip(files);
       const blobUrl = URL.createObjectURL(blob);
       const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
@@ -371,6 +399,22 @@ document.addEventListener('DOMContentLoaded', () => {
     batchRunning = false;
     btnBatchDownload.disabled = false;
     updateSelectionUI();
+  }
+
+  // CSV with CRLF line endings and a UTF-8 BOM so Excel opens it correctly
+  // (titles are frequently non-ASCII).
+  function buildSourcesCsv(rows) {
+    const escapeCell = (v) => {
+      const s = String(v == null ? '' : v);
+      return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const text = rows.map(r => r.map(escapeCell).join(',')).join('\r\n') + '\r\n';
+    const body = new TextEncoder().encode(text);
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const out = new Uint8Array(bom.length + body.length);
+    out.set(bom, 0);
+    out.set(body, bom.length);
+    return out;
   }
 
   async function fetchImageBytes(url) {
