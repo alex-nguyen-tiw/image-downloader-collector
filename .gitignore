@@ -7,3 +7,30 @@ dist/
 # Ignore stray zips everywhere else.
 *.zip
 !releases/**/*.zip
+
+# ---------------------------------------------------------------------------
+# Store listing artwork: screenshots, promo tiles, marquee banners, canvases.
+# These are marketing deliverables, not build inputs — build.ps1 never reads
+# store-assets/. They are large, get re-exported often, and would otherwise
+# bloat every clone.
+#
+# NOTE: these files then live only on the local disk. Keep your own backup;
+# git will not have them.
+# ---------------------------------------------------------------------------
+store-assets/**/*.png
+store-assets/**/*.jpg
+store-assets/**/*.jpeg
+store-assets/**/*.webp
+
+# Keep the written store material — that IS tracked.
+!store-assets/README.md
+
+# ---------------------------------------------------------------------------
+# design/ is deliberately NOT ignored. icon.svg and icon-master.png are the
+# sources the shipped src/icons/*.png are rendered from. A 128px PNG cannot be
+# scaled back up, so losing the master means the logo cannot be regenerated at
+# any new size. They are build inputs in every sense that matters.
+#
+# src/icons/*.png is likewise tracked on purpose — those files are packaged
+# into the extension itself.
+# ---------------------------------------------------------------------------
