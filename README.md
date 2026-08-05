@@ -3,8 +3,11 @@
 Extension backlink asset cho **tshirtsiwant.com**. Code giống hệt nhau giữa các
 trình duyệt; **chỉ khác `manifest.json`** theo engine.
 
-📄 Tính năng sản phẩm & hướng dẫn người dùng: [`store-assets/README.md`](store-assets/README.md)
+📘 **[`PRODUCT.md`](PRODUCT.md) — nguồn duy nhất cho mọi nội dung sản phẩm.** Tính năng đầy đủ,
+hướng dẫn sử dụng, FAQ, đoạn copy sẵn theo giới hạn ký tự từng store, từ khoá, góc viết blog.
+Viết blog hay mô tả store thì lấy từ đây; tính năng đổi thì **sửa ở đây trước**.
 📝 Lịch sử version: [`CHANGELOG.md`](CHANGELOG.md)
+🛡️ Giải trình quyền cho reviewer: [`store-assets/README.md`](store-assets/README.md)
 
 ## Tính năng (v1.1.0)
 
