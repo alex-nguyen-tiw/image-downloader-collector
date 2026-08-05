@@ -7,13 +7,13 @@
 **Current Version:** 1.1.0  
 
 ---
-## 📖 Tính năng & hướng dẫn sử dụng
+## 📖 Features & user guide
 
-Mô tả sản phẩm, danh sách tính năng đầy đủ, hướng dẫn từng bước, FAQ và các đoạn copy
-sẵn cho store/blog đều nằm ở **[`../PRODUCT.md`](../PRODUCT.md)** — nguồn duy nhất.
+The product description, full feature list, step-by-step guide, FAQ and paste-ready store/blog
+copy all live in **[`../PRODUCT.md`](../PRODUCT.md)** — the single source of truth.
 
-File này chỉ giữ phần dành riêng cho **reviewer của store**: giải trình quyền và chính
-sách riêng tư. Làm vậy để mô tả tính năng không tồn tại hai bản rồi lệch nhau.
+This file keeps only what is specific to **store reviewers**: the permission justification and
+the privacy summary. Feature descriptions are kept in one place so the two cannot drift apart.
 
 ---
 

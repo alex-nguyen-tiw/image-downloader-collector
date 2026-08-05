@@ -1,198 +1,201 @@
 # Image Downloader & Collector — Product Source of Truth
 
-> **Đây là nguồn duy nhất** để viết blog, mô tả store, landing page, social post.
-> Mọi nội dung marketing về extension phải lấy từ file này. Khi tính năng thay đổi,
-> **sửa ở đây trước**, rồi mới copy đi nơi khác.
+> **This is the single source** for every piece of product content: blog posts, store
+> descriptions, landing pages, social posts. All marketing copy must come from this file.
+> When a feature changes, **update this file first**, then copy outward.
 >
-> Cập nhật cho **v1.1.0** — 2026-08-05
-> Tài liệu liên quan: [`CHANGELOG.md`](CHANGELOG.md) · [`store-assets/README.md`](store-assets/README.md) (giải trình quyền cho reviewer)
+> Current as of **v1.1.0** — 2026-08-05
+> Related: [`CHANGELOG.md`](CHANGELOG.md) · [`store-assets/README.md`](store-assets/README.md) (reviewer permission notes)
 
 ---
 
-## 1. Định vị sản phẩm
+## 1. Positioning
 
-**Tên đầy đủ:** Image Downloader & Collector - Batch Save
-**Tên rút gọn (dùng trong UI, menu chuột phải):** Image Collector
-**Nhà phát hành:** Tshirts I Want — https://tshirtsiwant.com/
-**Nền tảng:** Chrome · Microsoft Edge · Opera · Brave · Firefox
-**Kỹ thuật:** Manifest V3
+**Full name:** Image Downloader & Collector - Batch Save
+**Short name (used in the UI and right-click menu):** Image Collector
+**Publisher:** Tshirts I Want — https://tshirtsiwant.com/
+**Platforms:** Chrome · Microsoft Edge · Opera · Brave · Firefox
+**Technical:** Manifest V3
 
 ### One-liner
 > Save and batch-download the **original** image behind any thumbnail — organised into folders, with every source URL kept.
 
-### Elevator pitch (2 câu)
+### Elevator pitch (two sentences)
 > Image Collector lets you hover or right-click any image on the web to download the true original file — not the compressed thumbnail the page is showing you. Save images into custom folders as you browse, then export an entire collection as a single ZIP with a CSV of where every image came from.
 
-### Điểm khác biệt cốt lõi
-Hầu hết extension tải ảnh đều lấy đúng cái URL trang đang hiển thị — tức là thumbnail.
-Image Collector **phân giải ảnh gốc từ DOM của trang**, có quy tắc riêng cho từng site lớn.
-Đây là thứ nên nhấn mạnh trong mọi bài viết: **"original, not thumbnail"**.
+### Core differentiator
+Most image downloaders grab whatever URL the page is displaying — which is a thumbnail.
+Image Collector **resolves the original from the page's DOM**, with dedicated rules for the
+major sites. This is the point to lead with in any piece of writing:
+**"original, not thumbnail."**
 
 ---
 
-## 2. Đối tượng người dùng
+## 2. Audience
 
-| Nhóm | Nhu cầu | Thông điệp phù hợp |
+| Segment | Need | Matching message |
 |---|---|---|
-| **Print-on-demand seller / T-shirt designer** | Gom mockup, nghiên cứu design đang bán chạy trên Etsy/Amazon | "Research competitor listings without losing track of where each design came from" |
-| **Graphic designer / illustrator** | Dựng mood board, thư viện tham khảo | "Build a reference library that still remembers its sources" |
-| **Marketer / content creator** | Gom asset cho bài viết, social | "Collect now, download the whole set as one ZIP later" |
-| **Người mua sắm / so sánh sản phẩm** | Lưu ảnh sản phẩm chất lượng cao | "Get the full-resolution product photo, not the listing thumbnail" |
+| **Print-on-demand seller / T-shirt designer** | Collect mockups, research what sells on Etsy and Amazon | "Research competitor listings without losing track of where each design came from" |
+| **Graphic designer / illustrator** | Build mood boards and reference libraries | "Build a reference library that still remembers its sources" |
+| **Marketer / content creator** | Gather assets for posts and social | "Collect now, download the whole set as one ZIP later" |
+| **Shopper / product researcher** | Save high-quality product photos | "Get the full-resolution product photo, not the listing thumbnail" |
 
 ---
 
-## 3. Tính năng đầy đủ
+## 3. Full feature list
 
-### 3.1 Tải ảnh gốc — tính năng lõi
-Khi tải, extension **không** dùng URL đang hiển thị mà truy ngược ảnh gốc theo thứ tự:
+### 3.1 Original-image extraction — the core feature
+When downloading, the extension does **not** use the displayed URL. It works back to the
+original in this order:
 
-1. **Quy tắc riêng cho Amazon** — đọc `data-old-hires` và `data-a-dynamic-image`
-   (chọn ảnh có diện tích lớn nhất), đồng thời gỡ các hậu tố kích thước trong đường
-   dẫn (`._AC_SL1500_.jpg` → `.jpg`)
-2. **Quy tắc riêng cho Etsy** — nâng cấp `il_570xN.` → `il_fullxfull.`
-3. **Thuộc tính data-*** — `data-src`, `data-original`, `data-high-res`, `data-full-url`,
+1. **Amazon-specific rules** — reads `data-old-hires` and `data-a-dynamic-image` (picking the
+   largest-area candidate), and strips size modifiers from the path
+   (`._AC_SL1500_.jpg` → `.jpg`)
+2. **Etsy-specific rule** — upgrades `il_570xN.` → `il_fullxfull.`
+3. **`data-*` attributes** — `data-src`, `data-original`, `data-high-res`, `data-full-url`,
    `data-zoom-image`, `data-src-large`, `data-actualsrc`, `data-old-hires`
-4. **`srcset`** — chọn ứng viên độ phân giải cao nhất
-5. **Thẻ `<a>` cha** nếu nó trỏ tới file ảnh
-6. **`currentSrc` / `src`**, sau khi gỡ tham số kích thước của CDN
+4. **`srcset`** — picks the highest-resolution candidate
+5. **Parent `<a>`** when it points at an image file
+6. **`currentSrc` / `src`**, after stripping CDN size parameters
    (`w`, `width`, `h`, `height`, `resize`, `size`, `fit`, `dpr`, `crop`, `thumbnail`…)
-7. **`background-image`** trong CSS, cho ảnh không nằm trong thẻ `<img>`
+7. **CSS `background-image`**, for images not inside an `<img>` tag
 
-> **Cẩn trọng đáng nói trong bài viết:** với URL có chữ ký số (`sig`, `token`,
-> `expires`, `hmac`, `policy`…), extension **không** đụng vào tham số — vì sửa sẽ
-> làm hỏng link. Đây là chi tiết cho thấy sản phẩm được làm cẩn thận.
+> **A detail worth mentioning in technical writing:** for signed URLs (`sig`, `token`,
+> `expires`, `hmac`, `policy`…), the extension leaves the parameters alone, because rewriting
+> them would break the link. It signals that the product was built carefully.
 
-### 3.2 Ba cách thao tác
+### 3.2 Three ways to act
 
-| Cách | Thao tác | Ghi chú |
+| Method | Action | Notes |
 |---|---|---|
-| **Hover** | Rê chuột lên ảnh → 2 icon tròn hiện ở góc trên-phải | Chỉ hiện với ảnh từ **60×60 px** trở lên, tránh làm phiền ở icon/logo nhỏ |
-| **Chuột phải** | `Image Collector ▸ Download original image` hoặc `▸ Save to collection ▸ [folder]` | Hoạt động cả trên trang lưới có lớp link phủ lên ảnh |
-| **Dashboard** | Nút tải trên từng card | Tải lại ảnh đã lưu bất cứ lúc nào |
+| **Hover** | Move the pointer over an image → two round icons appear top-right | Only on images **60×60 px and larger**, so small icons and logos are left alone |
+| **Right-click** | `Image Collector ▸ Download original image` or `▸ Save to collection ▸ [folder]` | Works on grid pages where a link overlay covers the image |
+| **Dashboard** | Download button on each card | Re-download any saved image at any time |
 
-### 3.3 Công tắc bật/tắt icon hover
-Switch **Hover icons** ở header dashboard. Tắt là icon biến mất khỏi **mọi tab đang mở
-ngay lập tức, không cần reload**. Extension vẫn chạy đầy đủ — menu chuột phải và
-dashboard không bị ảnh hưởng.
+### 3.3 Hover-icon on/off switch
+A **Hover icons** switch in the dashboard header. Turning it off removes the icons from
+**every open tab immediately, with no reload**. The extension stays fully active — the
+right-click menu and dashboard are unaffected.
 
-> Góc kể chuyện tốt cho blog: người dùng thường bỏ cài extension loại này vì icon
-> vướng mắt khi đang làm việc khác. Ở đây tắt icon **không** đồng nghĩa mất tính năng.
+> A good story angle: people uninstall tools like this because the icons get in the way during
+> other work. Here, turning the icons off **costs you nothing**.
 
-### 3.4 Thư mục & bộ sưu tập
-- Tạo thư mục tuỳ ý (*T-Shirt Ideas, Wallpapers, Client Work…*)
-- Lưu ảnh vào thư mục ngay từ trang web, không cần mở dashboard
-- **Tự phát hiện trùng**: cùng một ảnh lưu lại vào cùng thư mục sẽ báo "Already in collection"
-- Sidebar hiện số lượng ảnh mỗi thư mục
+### 3.4 Folders and collections
+- Create any folders you like (*T-Shirt Ideas, Wallpapers, Client Work…*)
+- File images into folders straight from the page, without opening the dashboard
+- **Automatic duplicate detection**: saving the same image to the same folder reports
+  "Already in collection"
+- The sidebar shows a count per folder
 
-### 3.5 Truy nguồn ảnh
-Mỗi ảnh lưu lại đều ghi kèm trang nguồn:
-- **Badge domain** bấm được ở góc dưới-trái mỗi card → mở lại đúng trang gốc
-- **Tìm theo domain** trong ô search (gõ `etsy.com` để lọc)
-- **`sources.csv`** trong mỗi file ZIP: `filename, title, folder, source_domain,
-  source_url, saved_at` — CRLF + BOM UTF-8 để Excel mở đúng ký tự có dấu
+### 3.5 Source tracking
+Every saved image records the page it came from:
+- A clickable **domain badge** in the bottom-left of each card → reopens the source page
+- **Search by domain** in the search box (type `etsy.com` to filter)
+- **`sources.csv`** inside every ZIP: `filename, title, folder, source_domain, source_url,
+  saved_at` — CRLF plus a UTF-8 BOM so Excel renders accented characters correctly
 
-> Dữ liệu nguồn đã được ghi từ **v1.0.0**, nên người dùng cũ thấy nguồn ngay sau khi
-> cập nhật lên 1.1.0 mà không mất gì.
+> Source data has been recorded since **v1.0.0**, so existing users see sources immediately
+> after updating to 1.1.0, with nothing lost.
 
-### 3.6 Tải hàng loạt thành ZIP
-- **Download All (.zip)** hoặc **Download Selected .zip**
-- Trong file ZIP, ảnh được **gom theo đúng thư mục** của bộ sưu tập
-- Tự nhận đuôi file thật bằng magic bytes nếu URL không có đuôi
-- Tên file trùng được tự động đánh số
-- Kèm `sources.csv`
-- Tên file xuất: `image-collection-<timestamp>.zip`
+### 3.6 Batch ZIP export
+- **Download All (.zip)** or **Download Selected .zip**
+- Inside the archive, images are **grouped into the same folders** as the collection
+- File extensions are sniffed from magic bytes when the URL has none
+- Duplicate filenames are numbered automatically
+- `sources.csv` included
+- Output filename: `image-collection-<timestamp>.zip`
 
-### 3.7 Tìm kiếm & quản lý
-Ô search khớp đồng thời **tên ảnh, domain nguồn, và tên thư mục**.
-Có Select All, xoá nhiều ảnh, xoá từng ảnh.
+### 3.7 Search and management
+The search box matches **image title, source domain, and folder name** at once.
+Select All, bulk delete, and per-image delete are available.
 
-### 3.8 Chi tiết hoàn thiện đáng nhắc tới
-Những điểm này thường bị extension khác làm ẩu — nên đưa vào bài so sánh:
+### 3.8 Polish worth calling out
+These are the details other extensions get wrong — good material for a comparison piece:
 
-- **Icon không bao giờ bị méo.** Toàn bộ giao diện chèn vào trang nằm trong Shadow DOM
-  riêng, CSS của website không chạm tới được. Nút luôn tròn, đúng kích thước trên mọi site.
-- **Không hiện icon trên video.** Trình phát video (YouTube…) bị bỏ qua, kể cả khi
-  poster của video là ảnh nền CSS.
-- **Bắt được ảnh nằm dưới lớp phủ.** Trang dạng lưới sản phẩm hay phủ một thẻ `<a>`
-  trong suốt lên ảnh; extension dò xuyên qua để tìm đúng ảnh dưới con trỏ.
-- **Nơi lưu gọn gàng.** Ảnh tải về vào `ImageCollector/`, có thư mục thì vào
-  `ImageCollector/<Tên thư mục>/`.
-
----
-
-## 4. Hướng dẫn sử dụng (bản đầy đủ, dùng lại cho blog "how to")
-
-### Cài đặt
-1. Cài từ store của trình duyệt
-2. Ghim icon extension lên thanh công cụ để mở dashboard nhanh
-
-### Lưu ảnh khi đang lướt web
-1. Rê chuột lên ảnh bất kỳ → hai icon hiện ở góc trên-phải
-2. Bấm 🔖 **Save** → chọn thư mục từ dropdown
-3. Toast xác nhận hiện lên
-
-*Hoặc:* chuột phải lên ảnh → **Image Collector ▸ Save to collection ▸** chọn thư mục.
-
-### Tải nhanh một ảnh
-Rê chuột lên ảnh → bấm ⬇ **Download**.
-*Hoặc:* chuột phải → **Image Collector ▸ Download original image**.
-
-Ảnh về máy là **bản gốc**, không phải thumbnail đang thấy.
-
-### Tắt icon hover khi không cần
-Mở dashboard → gạt switch **Hover icons** ở header. Icon biến mất ngay trên mọi tab.
-Chuột phải vẫn dùng được bình thường.
-
-### Quản lý bộ sưu tập & tải hàng loạt
-1. Bấm icon extension để mở dashboard
-2. Dùng sidebar chuyển giữa **All Images** và các thư mục
-3. **New Folder** để tạo thư mục mới
-4. Chọn từng ảnh hoặc **Select All**
-5. **Download All (.zip)** hoặc **Download Selected .zip**
-6. Giải nén: ảnh đã gom theo thư mục, kèm `sources.csv`
-
-### Truy lại nguồn ảnh
-- Bấm badge domain ở góc dưới-trái card → mở lại trang gốc
-- Gõ domain vào ô search để lọc
-- Mở `sources.csv` trong file ZIP bằng Excel / Google Sheets
+- **The icons never get distorted.** All injected UI lives in its own Shadow DOM, out of reach
+  of the website's CSS. The buttons stay perfectly round and correctly sized on every site.
+- **No icons on videos.** Video players (YouTube and similar) are skipped, even when the poster
+  frame is a CSS background image.
+- **Finds images under overlays.** Product-grid pages often lay a transparent `<a>` over the
+  image; the extension looks through it to find the image under the cursor.
+- **Tidy downloads.** Files land in `ImageCollector/`, or `ImageCollector/<Folder name>/` when
+  the image belongs to a folder.
 
 ---
 
-## 5. Câu hỏi thường gặp (FAQ — dùng cho blog & store)
+## 4. User guide (reusable as a "how to" post)
 
-**Ảnh tải về có đúng là ảnh gốc không?**
-Có. Extension đọc thuộc tính DOM của trang để tìm bản gốc, thay vì dùng URL đang hiển thị.
-Với Amazon và Etsy có quy tắc riêng cho từng site.
+### Install
+1. Install from your browser's store
+2. Pin the extension icon to the toolbar for quick access to the dashboard
 
-**Có gửi dữ liệu của tôi đi đâu không?**
-Không. Toàn bộ bộ sưu tập và thư mục nằm trong `chrome.storage.local` trên máy bạn.
-Không có tài khoản, không đăng nhập, không máy chủ, không theo dõi.
+### Save images while browsing
+1. Hover any image → two icons appear in the top-right corner
+2. Click 🔖 **Save** → choose a folder from the dropdown
+3. A toast confirms the save
 
-**Tắt icon hover thì có mất tính năng không?**
-Không. Chuột phải và dashboard vẫn hoạt động đầy đủ.
+*Or:* right-click the image → **Image Collector ▸ Save to collection ▸** pick a folder.
 
-**Ảnh lưu trước khi cập nhật có hiện nguồn không?**
-Có. Thông tin nguồn đã được ghi từ phiên bản đầu tiên.
+### Download a single image
+Hover the image → click ⬇ **Download**.
+*Or:* right-click → **Image Collector ▸ Download original image**.
 
-**Lưu ảnh có chiếm dung lượng ổ đĩa không?**
-Không. Lưu vào bộ sưu tập chỉ ghi lại đường dẫn và thông tin ảnh. Chỉ khi bấm tải
-thì file mới về máy.
+What lands on your drive is the **original**, not the thumbnail you were looking at.
 
-**Dùng được trên trình duyệt nào?**
-Chrome, Microsoft Edge, Opera, Brave và Firefox.
+### Turn the hover icons off
+Open the dashboard → flip the **Hover icons** switch in the header. The icons disappear from
+every tab at once. Right-click still works exactly as before.
 
-**Vì sao cần quyền truy cập mọi trang web?**
-Để phát hiện ảnh khi rê chuột và đọc thuộc tính ảnh độ phân giải cao trên bất kỳ site nào.
-Extension không đọc, không lưu, không gửi đi nội dung trang.
+### Manage collections and batch download
+1. Click the extension icon to open the dashboard
+2. Use the sidebar to move between **All Images** and your folders
+3. **New Folder** creates a new category
+4. Select individual images, or **Select All**
+5. **Download All (.zip)** or **Download Selected .zip**
+6. Unzip: images are grouped by folder, with `sources.csv` alongside
+
+### Trace an image back to its source
+- Click the domain badge in the bottom-left of a card → reopens the source page
+- Type a domain into the search box to filter
+- Open `sources.csv` from any ZIP in Excel or Google Sheets
 
 ---
 
-## 6. Đoạn copy sẵn để dán
+## 5. FAQ (for blog and store use)
 
-> ⚠️ Giới hạn ký tự mỗi store có thể đổi — **đếm lại trước khi nộp**.
-> Số ký tự ghi kèm dưới đây đã tính sẵn.
+**Do I really get the original image?**
+Yes. The extension reads the page's DOM attributes to find the original, rather than using the
+URL being displayed. Amazon and Etsy have dedicated rules.
 
-### Tagline (chọn 1)
+**Is any of my data sent anywhere?**
+No. Your collections and folders live in `chrome.storage.local` on your own machine. No
+account, no sign-in, no servers, no tracking.
+
+**Do I lose features if I turn the hover icons off?**
+No. The right-click menu and dashboard keep working in full.
+
+**Will images I saved before the update show their source?**
+Yes. Source information has been recorded since the first release.
+
+**Does saving images use disk space?**
+No. Saving to a collection only records the image's URL and metadata. Files are downloaded
+only when you ask for them.
+
+**Which browsers are supported?**
+Chrome, Microsoft Edge, Opera, Brave and Firefox.
+
+**Why does it need access to all websites?**
+To detect images on hover and read high-resolution image attributes on any site. The extension
+does not read, store, or transmit page content.
+
+---
+
+## 6. Paste-ready copy
+
+> ⚠️ Character limits differ per platform and change over time — **re-count in the editor
+> before submitting**. The counts below are measured, not estimated.
+
+### Taglines (pick one)
 ```
 Download the original, not the thumbnail.
 ```
@@ -203,30 +206,30 @@ Collect images. Keep the source. Export everything.
 Hover, save, batch-download — in original quality.
 ```
 
-### Mô tả ngắn — dùng cho `description` trong manifest & summary của store
-**Giới hạn manifest Chrome/Edge: 132 ký tự.**
+### Short description — manifest `description` and store summary
+**Chrome/Edge manifest limit: 132 characters.**
 
-Bản đang dùng (130 ký tự):
+Currently in use (130 characters):
 ```
 Powered by Tshirts I Want: Quick download & bookmark images into custom folders, then batch download graphic designs with 1-click.
 ```
 
-Phương án thay, nhấn vào điểm khác biệt (124 ký tự):
+Alternative leading with the differentiator (124 characters):
 ```
 Hover or right-click any image to download the true original, save into folders, and batch-export a whole collection as ZIP.
 ```
 
-Phương án ngắn gọn (98 ký tự):
+Shortest option (98 characters):
 ```
 Download original images, not thumbnails. Save into folders and batch-export them as a single ZIP.
 ```
 
-### Mô tả vừa — cho AMO summary (giới hạn 250 ký tự) · 244 ký tự
+### Medium description — AMO summary (250-character limit) · 244 characters
 ```
 Image Collector saves and downloads the original image behind any thumbnail. Hover or right-click to grab it, organise images into custom folders as you browse, then export a whole collection as one ZIP — with a CSV of every image's source URL.
 ```
 
-### Mô tả dài — cho trang listing của store
+### Long description — store listing body
 ```
 Image Downloader & Collector turns image hunting into a clean workflow.
 
@@ -254,7 +257,7 @@ No account, no sign-in, no servers, no tracking. Everything stays in your browse
 Powered by Tshirts I Want — https://tshirtsiwant.com/
 ```
 
-### Danh sách tính năng dạng bullet — cho landing page / social
+### Feature bullets — landing page and social
 ```
 • Downloads the true original image, not the on-screen thumbnail
 • Dedicated support for Amazon and Etsy product images
@@ -268,12 +271,7 @@ Powered by Tshirts I Want — https://tshirtsiwant.com/
 • 100% local — no account, no tracking
 ```
 
-### Mô tả tiếng Việt — cho blog VN
-```
-Image Collector giúp bạn tải đúng ảnh gốc phía sau mỗi thumbnail. Rê chuột hoặc bấm chuột phải lên bất kỳ ảnh nào để tải về hoặc lưu vào thư mục riêng, rồi xuất cả bộ sưu tập thành một file ZIP kèm danh sách nguồn của từng ảnh. Có quy tắc riêng cho Amazon và Etsy. Toàn bộ dữ liệu nằm trên máy bạn, không tài khoản, không theo dõi.
-```
-
-### Từ khoá / tag
+### Keywords / tags
 ```
 image downloader, bulk image download, batch download images, save images,
 original image, full resolution, high resolution images, image collector,
@@ -283,50 +281,51 @@ mood board, print on demand, graphic assets, zip download, image organizer
 
 ---
 
-## 7. Góc viết blog gợi ý
+## 7. Blog angles
 
-1. **"Tại sao extension tải ảnh của bạn chỉ tải về thumbnail"** — bài giải thích kỹ thuật:
-   `srcset`, tham số kích thước CDN, thuộc tính DOM của Amazon/Etsy. Đây là bài có giá
-   trị SEO cao nhất vì giải quyết đúng nỗi đau người dùng chưa gọi tên được.
-2. **"Nghiên cứu đối thủ trên Etsy mà không lạc mất nguồn"** — bài workflow cho seller POD,
-   nhấn vào `sources.csv`.
-3. **"Dựng mood board 200 ảnh trong 10 phút"** — bài use case, nhấn batch ZIP + thư mục.
-4. **"Extension nên biết cách tự biến mất"** — bài quan điểm về thiết kế, lấy công tắc
-   hover làm ví dụ.
-
----
-
-## 8. Ranh giới — điều **không** được viết
-
-Để tránh bị store gỡ hoặc mất uy tín, tuyệt đối không tuyên bố:
-
-- ❌ **"Tải được ảnh từ mọi website"** — site dùng URL ký số hoặc chặn hotlink có thể thất bại.
-- ❌ **"Vượt qua chặn tải ảnh / DRM"** — extension không làm việc đó và store cấm.
-- ❌ **"Tải được ảnh Instagram / Facebook / Pinterest riêng tư"** — chưa kiểm chứng, dễ vi phạm chính sách.
-- ❌ **"Nâng cấp / làm nét ảnh"** — extension lấy file gốc có sẵn, **không** upscale.
-- ❌ **"Tải hàng loạt toàn bộ ảnh trong trang chỉ bằng 1 click"** — hiện phải lưu từng ảnh trước, chưa có chức năng quét cả trang.
-- ❌ Nhắc tới tính năng chưa có: tag thủ công, đồng bộ đám mây, chia sẻ bộ sưu tập, tải video.
-
-Câu an toàn thay thế: *"works across the web, with dedicated support for Amazon and Etsy"*.
+1. **"Why your image downloader only saves thumbnails"** — the technical explainer: `srcset`,
+   CDN size parameters, Amazon/Etsy DOM attributes. Highest SEO value, because it names a pain
+   readers have felt but never articulated.
+2. **"Researching Etsy competitors without losing your sources"** — a workflow piece for POD
+   sellers, built around `sources.csv`.
+3. **"Build a 200-image mood board in 10 minutes"** — a use-case piece on batch ZIP and folders.
+4. **"A browser extension should know how to get out of the way"** — an opinion piece using the
+   hover toggle as its example.
 
 ---
 
-## 9. Ghi chú bản quyền cần có trong bài dài
+## 8. Boundaries — what must **never** be claimed
 
-> Người dùng chịu trách nhiệm tôn trọng bản quyền và điều khoản sử dụng của website.
-> Công cụ này dành cho việc thu thập tài liệu tham khảo và nghiên cứu hợp pháp.
+To avoid delisting or losing credibility, never claim:
+
+- ❌ **"Downloads images from every website"** — sites using signed URLs or hotlink protection can fail.
+- ❌ **"Bypasses image download protection / DRM"** — the extension does not do this, and stores forbid it.
+- ❌ **"Downloads private Instagram / Facebook / Pinterest images"** — unverified and likely a policy violation.
+- ❌ **"Upscales or enhances images"** — the extension fetches an existing original; it does **not** upscale.
+- ❌ **"Download every image on a page in one click"** — images must be saved individually first;
+  there is no whole-page scraping feature.
+- ❌ Any feature that does not exist: manual tags, cloud sync, shared collections, video downloads.
+
+Safe alternative phrasing: *"works across the web, with dedicated support for Amazon and Etsy"*.
 
 ---
 
-## 10. Thông tin cố định
+## 9. Copyright note to include in long-form pieces
 
-| Trường | Giá trị |
+> Users are responsible for respecting the copyright and terms of use of the websites they
+> visit. This tool is intended for lawful reference gathering and research.
+
+---
+
+## 10. Fixed facts
+
+| Field | Value |
 |---|---|
-| Tên extension | Image Downloader & Collector - Batch Save |
-| Tên rút gọn | Image Collector |
-| Version hiện tại | 1.1.0 |
-| Nhà phát hành | Tshirts I Want |
+| Extension name | Image Downloader & Collector - Batch Save |
+| Short name | Image Collector |
+| Current version | 1.1.0 |
+| Publisher | Tshirts I Want |
 | Website | https://tshirtsiwant.com/ |
-| Quyền sử dụng | `storage`, `downloads`, `contextMenus`, `<all_urls>` |
-| Thu thập dữ liệu | Không |
-| Giá | Miễn phí |
+| Permissions | `storage`, `downloads`, `contextMenus`, `<all_urls>` |
+| Data collection | None |
+| Price | Free |

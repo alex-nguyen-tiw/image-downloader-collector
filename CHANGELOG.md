@@ -1,75 +1,75 @@
 # Changelog
 
-Mỗi version đều có git tag (`git show v1.1.0`) và zip lưu trong `releases/`.
+Every version has a git tag (`git show v1.1.0`) and a packaged zip under `releases/`.
 
 ---
 
 ## 1.1.0 — 2026-08-05
 
-### Thêm mới
+### Added
 
-**Công tắc bật/tắt icon hover**
-Switch **Hover icons** ở header dashboard. Tắt là icon Download/Save biến mất khỏi
-mọi trang **ngay lập tức, không cần reload tab**. Extension vẫn chạy đầy đủ —
-menu chuột phải và dashboard không bị ảnh hưởng, nên tắt icon không đồng nghĩa
-mất tính năng.
+**Hover-icon on/off switch**
+A **Hover icons** switch in the dashboard header. Turning it off removes the Download/Save
+icons from every page **immediately, with no tab reload**. The extension stays fully active —
+the right-click menu and the dashboard are unaffected — so turning the icons off does not
+cost you any functionality.
 
-**Menu chuột phải**
+**Right-click menu**
 ```
 Image Collector ▸ Download original image
-                ▸ Save to collection ▸ [Default / folder của bạn / …]
+                ▸ Save to collection ▸ [Default / your folders / …]
 ```
-Submenu folder tự đồng bộ với các folder tạo trong dashboard.
+The folder submenu stays in sync with the folders created in the dashboard.
 
-Menu **không** tải thẳng URL mà trình duyệt báo cáo cho ảnh — trên Amazon/Etsy đó
-là thumbnail đang hiển thị. Thay vào đó content script phân giải ảnh gốc từ chính
-DOM của trang, dùng lại đúng bộ quy tắc của nút hover.
+The menu deliberately does **not** download the URL the browser reports for the image — on
+Amazon and Etsy that is the on-screen thumbnail. Instead the content script resolves the
+original from the page's own DOM, reusing the same rules as the hover button.
 
-Menu đăng ký ở cả context `image` lẫn `link`, vì trang dạng lưới sản phẩm thường
-phủ một thẻ `<a>` trong suốt lên ảnh — khi đó trình duyệt coi là link chứ không
-phải ảnh.
+The menu registers for both the `image` and `link` contexts, because product-grid pages
+commonly lay a transparent `<a>` over the image, which the browser then reports as a link
+rather than an image.
 
-**Truy nguồn ảnh đã lưu**
-- Badge domain bấm được ở góc dưới-trái mỗi card, mở lại đúng trang nguồn
-- Ô search lọc được theo domain (ví dụ gõ `etsy.com`)
-- Mỗi file ZIP xuất ra kèm `sources.csv`: filename, title, folder, source_domain,
-  source_url, saved_at — CRLF + BOM UTF-8 để Excel mở đúng tiếng Việt
+**Source tracking**
+- A clickable domain badge in the bottom-left of each card that reopens the source page
+- The search box filters by domain (e.g. type `etsy.com`)
+- Every ZIP export ships a `sources.csv`: filename, title, folder, source_domain,
+  source_url, saved_at — CRLF plus a UTF-8 BOM so Excel opens non-ASCII titles correctly
 
-> Dữ liệu `sourceUrl`/`sourceDomain` đã được ghi từ v1.0.0 nhưng chưa bao giờ hiển
-> thị. Vì vậy **bộ sưu tập cũ hiện nguồn ngay sau khi cập nhật**, không cần
-> migrate hay lưu lại.
+> `sourceUrl`/`sourceDomain` have been recorded since v1.0.0 but were never displayed.
+> **Existing collections therefore show their sources immediately after updating**, with no
+> migration and nothing lost.
 
-### Thay đổi
-- Logo mới cho toàn bộ kích thước icon (16/32/48/128 + 64/300 cho store)
-- Nhãn version trong popup đọc từ manifest, không còn hardcode
+### Changed
+- New logo across every icon size (16/32/48/128, plus 64/300 for store listings)
+- The popup version label now reads from the manifest instead of a hardcoded string
 
-### Quyền
-- Thêm `contextMenus` — chỉ để tạo mục menu chuột phải. Không đọc thêm nội dung
-  trang, không cần host permission mới.
+### Permissions
+- Added `contextMenus`, solely to create the right-click menu entries. It reads no additional
+  page content and requires no new host permission.
 
 ---
 
 ## 1.0.1
 
-Bản build Chromium hợp lệ đầu tiên. Không đổi tính năng so với 1.0.0.
+The first valid Chromium build. No feature changes from 1.0.0.
 
-- Sửa lỗi khiến Opera v1.0.0 trượt duyệt: manifest Gecko (`background.scripts`)
-  bị nộp lên store Chromium nên service worker không chạy. Bản Chromium dùng
+- Fixes the defect that failed Opera v1.0.0: the Gecko manifest (`background.scripts`) had been
+  submitted to a Chromium store, so the service worker never ran. The Chromium build now uses
   `background.service_worker`.
-- **Store:** Edge approved · Opera chờ duyệt
+- **Stores:** Edge approved · Opera awaiting moderation
 
 ---
 
 ## 1.0.0
 
-Bản phát hành đầu tiên.
+Initial release.
 
-- Hover lên ảnh để Download hoặc Save vào folder tuỳ chỉnh
-- Trích ảnh gốc độ phân giải cao từ `srcset` / `data-src` / tham số CDN, có quy
-  tắc riêng cho Amazon (`data-old-hires`, `data-a-dynamic-image`) và Etsy
+- Hover any image to Download or Save it into a custom folder
+- High-resolution original extraction from `srcset` / `data-src` / CDN parameters, with
+  dedicated rules for Amazon (`data-old-hires`, `data-a-dynamic-image`) and Etsy
   (`il_fullxfull`)
-- Dashboard quản lý folder, tìm kiếm, chọn nhiều ảnh
-- Tải hàng loạt thành một file `.zip` (ZIP writer tự viết, không dùng thư viện ngoài)
-- UI overlay đặt trong Shadow DOM nên CSS của trang không làm méo icon
-- Bỏ qua trình phát video (YouTube…) để không hiện icon nhầm chỗ
-- **Store:** Firefox approved
+- Dashboard with folder management, search, and multi-select
+- Batch download as a single `.zip` (hand-written ZIP writer, no external libraries)
+- The overlay UI lives in a Shadow DOM, so page CSS cannot distort the icons
+- Video players (YouTube and similar) are skipped so icons never appear over them
+- **Stores:** Firefox approved
