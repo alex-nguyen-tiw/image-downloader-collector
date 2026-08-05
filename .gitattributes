@@ -1,0 +1,6 @@
+# Keep source bytes stable across machines so packaged builds are reproducible
+# and match exactly what was tested before submission.
+* text=auto eol=lf
+
+*.png binary
+*.zip binary

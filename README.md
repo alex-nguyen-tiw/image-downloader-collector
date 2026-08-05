@@ -1,72 +1,42 @@
-# Image Downloader & Collector - User Guide & Documentation
+# Image Downloader & Collector — Quản lý build đa trình duyệt
 
-**Extension Title:** Image Downloader & Collector - Batch Save Graphic Designs  
-**Publisher:** Tshirts I Want  
-**Official Website:** [https://tshirtsiwant.com/](https://tshirtsiwant.com/)  
-**Manifest Version:** Manifest V3  
+Extension backlink asset cho **tshirtsiwant.com**. Code giống hệt nhau giữa các
+trình duyệt; **chỉ khác `manifest.json`** theo engine.
 
----
+## Cấu trúc
 
-## 🌟 Overview
+| Thư mục | Dùng cho | Điểm khác trong manifest |
+|---|---|---|
+| `chromium/` | **Chrome, Edge, Opera, Brave** | `background.service_worker`, **không** có `gecko`. Tên phải ≤ **45 ký tự** (giới hạn Chromium) |
+| `firefox/` | **Firefox (AMO)** | `background.scripts` + `browser_specific_settings.gecko` |
+| `store-assets/` | Ảnh cho trang listing (screenshot, promo, icon300), README cũ, script generate | **KHÔNG** đóng vào zip |
+| `dist/` | Các zip đã build sẵn để upload | Chỉ chứa 11 file extension thật |
 
-**Image Downloader & Collector** is a high-speed browser extension created for graphic designers, digital artists, creators, and shoppers to easily discover, bookmark, organize, and batch download visual art, design mockups, and high-resolution images across the web.
+## Nguyên tắc vàng
 
-Powered by [Tshirts I Want](https://tshirtsiwant.com/), this extension simplifies the design inspiration workflow by offering intuitive hover-to-save overlays, custom folder collections, and single-click ZIP batch downloads.
+> **Chromium (Chrome/Edge/Opera/Brave) BẮT BUỘC `service_worker`.**
+> Nộp bản `background.scripts` (bản Firefox) lên store Chromium → service worker
+> không chạy → trượt duyệt. Đây chính là lỗi đã xảy ra với Opera v1.0.0.
 
----
+## Trạng thái store (cập nhật 2026-08-03)
 
-## ⚡ Key Features
+| Store | Engine | Version live | Trạng thái |
+|---|---|---|---|
+| Firefox AMO | Gecko | 1.0.0 | ✅ Approved |
+| Opera | Chromium | — | ❌ Đã nộp **nhầm bản Firefox** → kẹt "Awaiting moderation" từ 2026-07-24. Cần rút/thay bằng `dist/ImageCollector-chromium-v1.0.1.zip` |
+| Edge | Chromium | — | ❌ Cùng lỗi như Opera. Nộp lại bản chromium v1.0.1 |
+| Chrome Web Store | Chromium | — | Chưa nộp. Dùng bản chromium v1.0.1 |
 
-1. **Mouse Hover Quick Action Bar**: Hover over any image on any webpage to reveal instant quick actions:
-   - ⚡ **Quick Download**: Download the high-resolution original image immediately.
-   - 🔖 **Save to Collection**: Bookmark the image into custom folders without cluttering your hard drive.
-2. **Original High-Res Extraction**: Smart algorithm detecting highest resolution source from `srcset`, `data-src`, `data-original`, and un-scaled CDN parameters.
-3. **Custom Folder & Asset Management**: Create personalized collection folders (*e.g., T-Shirt Ideas, Wallpapers, Graphic Artwork*).
-4. **1-Click ZIP Batch Downloader**: Clean dashboard interface to select and download all pinned images in a folder as a single ZIP archive.
-5. **Privacy-First & Lightweight**: Operates entirely in the browser with 0% data tracking and zero background CPU bloat.
+## Build lại zip
 
----
+Chỉnh code trong `chromium/` hoặc `firefox/`, rồi chạy `build_zips.ps1`
+(tách file set sạch, path POSIX dấu `/`). Nhớ **bump `version`** trong manifest
+trước khi nộp lại — Opera/Edge từ chối version trùng bản đã submit.
 
-## 📖 Step-by-Step User Guide
+## Việc còn lại
 
-### 1. Saving Images While Browsing
-- Visit any website containing images (*e.g., Unsplash, Pinterest, Behance, online stores*).
-- Hover your mouse cursor over any image or design.
-- Click the **Save** button on the floating bar.
-- Choose your desired folder from the dropdown menu (*or save to Default*).
-- A success toast alert will confirm the image has been bookmarked.
-
-### 2. Quick Single Image Download
-- Hover over any image and click **Download** to save the original file directly to your computer's download folder.
-
-### 3. Managing Collections & Batch Downloading
-- Click the **Image Downloader & Collector** icon in your browser toolbar to open the Popup Dashboard.
-- Use the left sidebar to navigate between **All Images**, **Default**, or custom folders.
-- Click **"New Folder"** to create custom categories.
-- Select specific images or click **"Select All"**.
-- Click **"Download All (.zip)"** or **"Download Selected .zip"** to generate and download a single ZIP file containing all chosen images.
-
----
-
-## 🛡️ Permissions Justification (For Store Reviewers)
-
-| Permission | Purpose & Justification |
-| :--- | :--- |
-| `storage` | Required to save user folder structures and image bookmark metadata locally using `chrome.storage.local`. |
-| `downloads` | Required to initiate single image downloads and trigger ZIP archive batch downloads via `chrome.downloads`. |
-| `<all_urls>` (host permission) | Required to detect mouse hover events on images across arbitrary third-party websites and extract high-resolution `srcset` / `data-src` image URLs. |
-
----
-
-## 🔒 Privacy Policy Summary
-
-- **No Data Collection**: We do not collect, transmit, track, or sell user personal data, browsing history, or saved images.
-- **Local Storage**: All image collections and custom folder metadata reside 100% locally within your browser (`chrome.storage.local`).
-- **Official Publisher**: Developed and maintained by Tshirts I Want ([https://tshirtsiwant.com/](https://tshirtsiwant.com/)).
-
----
-
-## 📬 Support & Contact
-
-- **Website:** [https://tshirtsiwant.com/](https://tshirtsiwant.com/)
-- **Documentation:** Included with Chrome & Microsoft Edge Store Distribution Package
+1. Opera: mở dashboard → thay version bằng `dist/ImageCollector-chromium-v1.0.1.zip`.
+2. Edge Partner Center: nộp `dist/ImageCollector-chromium-v1.0.1.zip`; điền phần
+   giải trình quyền `<all_urls>` (đọc DOM mọi trang để phát hiện `<img>`/`srcset`
+   cho tính năng hover-save) + link privacy policy (khai "không thu thập dữ liệu").
+3. (Tuỳ chọn) Chrome Web Store: nộp cùng bản chromium.

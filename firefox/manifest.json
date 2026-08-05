@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Image Downloader & Collector - Batch Save",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Powered by Tshirts I Want: Quick download & bookmark images into custom folders, then batch download graphic designs with 1-click.",
   "permissions": [
     "storage",

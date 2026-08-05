@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Downloader & Collector</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="logo-area">
+      <img class="app-icon" src="icons/icon48.png" alt="Image Collector logo">
+      <div class="app-titles">
+        <h1>Image Collector</h1>
+        <span class="version-tag">v1.0</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="btn-new-folder" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        <span>New Folder</span>
+      </button>
+      <button id="btn-batch-download" class="btn btn-primary">
+        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <span>Download All (.zip)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Content -->
+  <div class="app-dashboard">
+
+    <!-- Sidebar / Folder Navigation -->
+    <aside class="folder-sidebar">
+      <div class="sidebar-title">Folders</div>
+      <div id="folder-list" class="folder-list">
+        <!-- Dynamic Folders populated by JS -->
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+
+      <!-- Search & Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="input-search" placeholder="Search saved images...">
+        </div>
+        <div class="toolbar-actions">
+          <label class="select-all-label">
+            <input type="checkbox" id="chk-select-all">
+            <span>Select All</span>
+          </label>
+          <button id="btn-download-selected" class="btn btn-sm btn-primary" disabled>
+            <span>Download Selected .zip (<span id="count-selected">0</span>)</span>
+          </button>
+          <button id="btn-delete-selected" class="btn btn-sm btn-danger" disabled>
+            <span>Delete Selected</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Image Grid -->
+      <div id="image-grid" class="image-grid">
+        <!-- Dynamic Images populated by JS -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="empty-state hidden">
+        <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+        <h3>No images in this collection</h3>
+        <p>Hover over any image on a website and click <strong>Save</strong> to add images here.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- App Footer Branding -->
+  <footer class="app-footer">
+    <div class="footer-brand-text">
+      <span>Powered by</span>
+      <a href="https://tshirtsiwant.com/" target="_blank" rel="noopener" class="brand-link">Tshirts I Want</a>
+      <span class="footer-tagline">— Design Inspiration & Graphic Asset Collector</span>
+    </div>
+  </footer>
+
+  <!-- New Folder Modal -->
+  <div id="modal-folder" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Create New Folder</h3>
+        <button class="modal-close" id="btn-close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label for="input-folder-name">Folder Name</label>
+        <input type="text" id="input-folder-name" placeholder="e.g. Wallpapers, Design Ideas...">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-folder">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-folder">Create Folder</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
